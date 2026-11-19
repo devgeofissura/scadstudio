@@ -1,0 +1,1 @@
+O código do suporte de demonstração inicial está embutido em src/App.jsx e reproduzido em suporte-demo.scad para facilitar a inspeção do projeto. A página inicia mostrando esse exemplo sem fazer requisições externas para carregar um arquivo do usuário.
