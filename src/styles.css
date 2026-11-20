@@ -138,7 +138,23 @@ button { color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 50% { opacity: .45; } }
 
+.tab-bar { height: 40px; flex: 0 0 40px; display: flex; align-items: stretch; gap: 4px; padding: 0 12px; border-bottom: 1px solid var(--line); background: #0f1619; }
+.tab-button { display: flex; align-items: center; gap: 8px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; color: #7e9197; background: transparent; font-size: 11px; font-weight: 700; cursor: pointer; transition: color .16s, background .16s; }
+.tab-button small { color: #5c7076; font-family: var(--mono); font-size: 8px; font-weight: 400; }
+.tab-button:hover { color: #bdd2d6; }
+.tab-button.active { color: var(--cyan); border-bottom-color: var(--cyan); background: rgba(81,216,232,.045); }
+.tab-button.active small { color: #7fa9ae; }
+.tab-bar-note { margin-left: auto; display: flex; align-items: center; color: #5b6d74; font-family: var(--mono); font-size: 8px; }
+.diagram-canvas { position: relative; flex: 1; min-height: 220px; display: grid; place-items: center; overflow: auto; padding: 18px; background-color: #f4f7f7; background-image: linear-gradient(90deg, rgba(31,62,68,.045) 1px, transparent 1px), linear-gradient(rgba(31,62,68,.045) 1px, transparent 1px); background-size: 24px 24px; }
+.diagram-canvas img { display: block; max-width: none; background: #fff; box-shadow: 0 4px 20px rgba(20,45,50,.14); }
+.export-primary { border-color: #5bd5e2; color: #071417; background: #69e2eb; font-weight: 800; }
+.export-primary:hover:not(:disabled) { border-color: #8ff0f6; color: #071417; filter: brightness(1.06); }
+.wireviz-workspace.is-dragging .viewer-panel { outline: 1px solid rgba(81,216,232,.5); }
+
 @media (max-width: 850px) {
+  .tab-button small, .tab-bar-note { display: none; }
+  .tab-button { padding: 0 10px; }
+
   .topbar { padding: 0 14px; }
   .topbar-center { display: none; }
   .brand-lockup { min-width: 0; }

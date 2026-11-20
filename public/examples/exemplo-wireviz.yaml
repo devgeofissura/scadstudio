@@ -1,0 +1,34 @@
+# Exemplo didático de projeto WireViz — SCAD Studio
+# Nenhum dado sai do navegador. Edite e clique em "Gerar diagrama".
+
+connectors:
+  J_CTRL:
+    type: "Controladora ESP32-S3 (exemplo)"
+    subtype: "sinais lógicos de 3,3 V"
+    notes: "Exemplo apenas — não é pinagem de produção."
+    pinlabels: [STEP, DIR, GND, LIM]
+  J_DRIVER:
+    type: "Driver de motor (exemplo)"
+    pinlabels: [PUL, DIR, GND]
+  J_FIM_CURSO:
+    type: "Fim de curso NF (exemplo)"
+    pinlabels: [NC, COM]
+
+cables:
+  W_SINAL:
+    type: "Cabo de sinal STEP/DIR/GND"
+    gauge: 0.25 mm2
+    colors: [YE, BN, BK]
+    wirelabels: [STEP, DIR, GND]
+  W_LIMITE:
+    type: "Cabo do fim de curso"
+    colors: [GN, BK]
+    wirelabels: [NC, COM]
+
+connections:
+  - - J_CTRL: [STEP, DIR, GND]
+    - W_SINAL: [1-3]
+    - J_DRIVER: [PUL, DIR, GND]
+  - - J_CTRL: [LIM, GND]
+    - W_LIMITE: [1-2]
+    - J_FIM_CURSO: [NC, COM]

@@ -14,6 +14,8 @@ import {
   Upload,
 } from 'lucide-react';
 import ViewerCanvas from './components/ViewerCanvas.jsx';
+import TabBar from './components/TabBar.jsx';
+import WireVizWorkspace from './components/WireVizWorkspace.jsx';
 
 const SAMPLE_SOURCE = `// SCAD Studio · suporte demonstrativo
 $fn = 64;
@@ -64,6 +66,8 @@ export default function App() {
   const [showGrid, setShowGrid] = useState(true);
   const [fitKey, setFitKey] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [activeTab, setActiveTab] = useState('scad');
+  const [wireStatus, setWireStatus] = useState({ text: 'WireViz', cls: '' });
 
   const renderSource = useCallback((nextSource = source, nextName = fileName) => {
     if (!workerRef.current || !wasmReady || !nextSource.trim()) return;
@@ -143,6 +147,7 @@ export default function App() {
   const handleDrop = (event) => {
     event.preventDefault();
     setDragging(false);
+    if (activeTab !== 'scad') return;
     loadFile(event.dataTransfer.files?.[0]);
   };
 
@@ -161,16 +166,18 @@ export default function App() {
   const statusClass = error ? 'status-error' : busy ? 'status-busy' : stlBytes ? 'status-ok' : '';
 
   return (
-    <main className={`app-shell ${dragging ? 'is-dragging' : ''}`} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }} onDrop={handleDrop}>
+    <main className={`app-shell ${dragging ? 'is-dragging' : ''}`} onDragOver={(event) => { event.preventDefault(); if (activeTab === 'scad') setDragging(true); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false); }} onDrop={handleDrop}>
       <header className="topbar">
         <div className="brand-lockup">
           <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
           <div className="brand-copy"><strong>SCAD<span>STUDIO</span></strong><small>OPENSCAD · WEB VIEWER</small></div>
         </div>
-        <div className="topbar-center"><span className="runtime-indicator" />{wasmReady ? 'RENDER LOCAL · WASM' : 'INICIANDO MOTOR'}</div>
-        <div className={`status-pill ${statusClass}`}><span className="status-dot" />{status}</div>
+        <div className="topbar-center"><span className="runtime-indicator" />{activeTab === 'scad' ? (wasmReady ? 'RENDER LOCAL · WASM' : 'INICIANDO MOTOR') : 'WIREVIZ · GRAFOS LOCAIS'}</div>
+        <div className={`status-pill ${activeTab === 'scad' ? statusClass : wireStatus.cls}`}><span className="status-dot" />{activeTab === 'scad' ? status : wireStatus.text}</div>
       </header>
 
+      <TabBar activeTab={activeTab} onChange={(tab) => { setActiveTab(tab); setDragging(false); }} />
+      {activeTab === 'scad' && (
       <section className="workspace">
         <aside className="source-panel">
           <div className="panel-heading">
@@ -247,6 +254,8 @@ export default function App() {
           </div>
         </section>
       </section>
+      )}
+      {activeTab === 'wireviz' && <WireVizWorkspace onStatusChange={setWireStatus} />}
 
       <footer className="app-footer"><span>SCAD STUDIO <b>·</b> BUILD 01</span><span><i /> COMPILAÇÃO NO NAVEGADOR</span><a href="/LICENSE" target="_blank" rel="noreferrer">GPL-2 · sem garantia</a><a href="https://openscad.org/downloads.html" target="_blank" rel="noreferrer">OpenSCAD WASM experimental</a></footer>
     </main>
