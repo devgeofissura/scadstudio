@@ -56,6 +56,8 @@ export default function WireVizWorkspace({ onStatusChange }) {
   const [fileName, setFileName] = useState('exemplo-wireviz.yaml');
   const [fileSize, setFileSize] = useState(0);
   const [inputKind, setInputKind] = useState('yaml');
+  const [layoutMode, setLayoutMode] = useState('organized');
+  const [pngScale, setPngScale] = useState(3);
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('Carregando motor de diagramas');
@@ -72,7 +74,7 @@ export default function WireVizWorkspace({ onStatusChange }) {
     onStatusChange({ text: status, cls });
   }, [status, error, busy, exporting, result, onStatusChange]);
 
-  const run = useCallback((text, name = fileName, kind = 'yaml') => {
+  const run = useCallback((text, name = fileName, kind = 'yaml', layout = layoutMode) => {
     if (!text || !text.trim()) return;
     if (kind !== 'yaml' && kind !== 'dot') {
       const payload = extractSvg(text, kind);
@@ -98,16 +100,25 @@ export default function WireVizWorkspace({ onStatusChange }) {
     setError('');
     setWarnings([]);
     setResult(null);
-    setStatus(kind === 'dot' ? 'Renderizando DOT' : 'Gerando diagrama');
+    setStatus(kind === 'dot' ? 'Renderizando DOT'
+      : layout === 'organized' ? 'Gerando layout organizado' : 'Gerando diagrama');
     workerRef.current.postMessage({
       type: kind === 'dot' ? 'render-dot' : 'convert',
       id,
       text,
       fileName: name,
+      layout,
     });
-  }, [fileName]);
+  }, [fileName, layoutMode]);
 
   runRef.current = run;
+
+  const changeLayout = useCallback((mode) => {
+    if (mode === layoutMode) return;
+    setLayoutMode(mode);
+    const pending = pendingRef.current;
+    if (pending?.text) run(pending.text, pending.name, pending.kind, mode);
+  }, [layoutMode, run]);
 
   useEffect(() => {
     const worker = new Worker(new URL('../workers/wireviz.worker.js', import.meta.url), { type: 'module' });
@@ -137,7 +148,7 @@ export default function WireVizWorkspace({ onStatusChange }) {
               setYaml(text);
               setFileName('exemplo-wireviz.yaml');
               setFileSize(new TextEncoder().encode(text).byteLength);
-              worker.postMessage({ type: 'convert', id, text, fileName: 'exemplo-wireviz.yaml' });
+              worker.postMessage({ type: 'convert', id, text, fileName: 'exemplo-wireviz.yaml', layout: 'organized' });
             })
             .catch(() => {
               if (userEditedRef.current) return;
@@ -232,7 +243,7 @@ export default function WireVizWorkspace({ onStatusChange }) {
         download(new TextEncoder().encode(svg), `${stem}.svg`, 'image/svg+xml;charset=utf-8');
       } else if (format === 'png') {
         if (!svg) throw new Error('Gere um diagrama antes de exportar PNG.');
-        download(await renderPng(svg), `${stem}.png`, 'image/png');
+        download(await renderPng(svg, pngScale), `${stem}.png`, 'image/png');
       } else if (format === 'pdf') {
         if (!svg) throw new Error('Gere um diagrama antes de exportar PDF.');
         download(await renderPdf(svg), `${stem}.pdf`, 'application/pdf');
@@ -242,7 +253,7 @@ export default function WireVizWorkspace({ onStatusChange }) {
     } finally {
       setExporting('');
     }
-  }, [fileName, inputKind, result, yaml]);
+  }, [fileName, inputKind, pngScale, result, yaml]);
 
   const lineCount = yaml.split('\n').length;
   const hasSvg = Boolean(result && (result.svg || ((inputKind === 'svg' || inputKind === 'html') && result.passthrough)));
@@ -297,9 +308,22 @@ export default function WireVizWorkspace({ onStatusChange }) {
             {busy ? <LoaderCircle className="spin" size={17} /> : <Play size={16} fill="currentColor" />}
             {busy ? 'Gerando…' : 'Gerar diagrama'}
           </button>
-          <p><Check size={13} /> YAML, DOT, SVG e HTML ficam neste dispositivo.</p>
+          <div className="layout-picker" role="group" aria-label="Layout do diagrama">
+            <span>LAYOUT</span>
+            <button type="button" className={layoutMode === 'organized' ? 'is-active' : ''} onClick={() => changeLayout('organized')}>Organizado</button>
+            <button type="button" className={layoutMode === 'wireviz' ? 'is-active' : ''} onClick={() => changeLayout('wireviz')}>WireViz</button>
+          </div>
+          <div className="export-scale">
+            <span>RESOLUÇÃO PNG</span>
+            <select aria-label="Resolução do PNG" value={pngScale} onChange={(event) => setPngScale(Number(event.target.value))}>
+              <option value={2}>2×</option>
+              <option value={3}>3×</option>
+              <option value={4}>4×</option>
+            </select>
+          </div>
+          <p><Check size={13} /> Organizado usa DOT com blocos fixos e preserva todas as ligações do YAML.</p>
         </div>
-        <div className="panel-footnote"><span className="footnote-dot" /> Layout Graphviz WASM · conversão sem servidor</div>
+        <div className="panel-footnote"><span className="footnote-dot" /> Graphviz WASM · conversão local · sem servidor</div>
       </aside>
 
       <section className="viewer-panel" aria-label="Pré-visualização do diagrama">

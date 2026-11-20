@@ -1,5 +1,6 @@
 import { instance } from '@viz-js/viz';
 import { convertWireVizToDot } from '../lib/wirevizToDot.js';
+import { convertWireVizToSchematicDot } from '../lib/wirevizToSchematicDot.js';
 
 let vizPromise = null;
 
@@ -29,10 +30,18 @@ self.onmessage = async (event) => {
     let stats = null;
     let warnings = [];
     if (message.type === 'convert') {
-      const converted = convertWireVizToDot(text);
+      // Layout organizado e o padrao: o YAML continua sendo a fonte das
+      // conexoes, mas o DOT gerado controla a posicao de cada bloco.
+      const organized = message.layout !== 'wireviz';
+      const converted = organized
+        ? convertWireVizToSchematicDot(text)
+        : convertWireVizToDot(text);
       dot = converted.dot;
       stats = converted.stats || null;
-      warnings = converted.warnings || [];
+      warnings = [...(converted.warnings || [])];
+      if (converted.audit && !converted.audit.ok) {
+        warnings.push(`Conexoes sem representacao no desenho: ${converted.audit.missing.slice(0, 6).join(', ')}`);
+      }
       for (const warning of warnings) self.postMessage({ type: 'warning', text: warning });
     }
     const svg = await renderDot(dot);

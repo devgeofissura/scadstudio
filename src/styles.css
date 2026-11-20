@@ -77,6 +77,12 @@ button { color: inherit; }
 .primary-button:disabled { opacity: .48; cursor: not-allowed; }
 .source-actions p { margin: 8px 0 0; display: flex; align-items: center; justify-content: center; gap: 5px; color: #71858a; font-size: 9px; }
 .source-actions p svg { color: #72c7aa; }
+.layout-picker, .export-scale { margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.layout-picker > span, .export-scale > span { color: #60757b; font: 8px var(--mono); letter-spacing: .1em; }
+.layout-picker button { min-height: 26px; padding: 0 9px; border: 1px solid #33474d; border-radius: 3px; color: #8fa4a9; background: #162226; font: 9px var(--mono); cursor: pointer; }
+.layout-picker button:hover { border-color: #5bd5e2; color: var(--cyan); }
+.layout-picker button.is-active { border-color: #5bd5e2; color: #071417; background: #69e2eb; font-weight: 800; }
+.export-scale select { min-height: 26px; padding: 0 6px; border: 1px solid #33474d; border-radius: 3px; color: #bcd0d4; background: #162226; font: 9px var(--mono); cursor: pointer; }
 .panel-footnote { min-height: 33px; padding: 0 14px; display: flex; align-items: center; gap: 7px; border-top: 1px solid var(--line-soft); color: #77888d; font-family: var(--mono); font-size: 8px; }
 .footnote-dot { width: 5px; height: 5px; background: var(--amber); box-shadow: none; }
 

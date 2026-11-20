@@ -321,10 +321,8 @@ function endLabel(endpoint, number, connectors, cables) {
 
 function colorRows(segments) {
   const hexes = segments.map((segment) => COLORS[segment] || FALLBACK_COLOR);
-  const middle = hexes.length === 1
-    ? [hexes[0], hexes[0], hexes[0]]
-    : [hexes[0], hexes[1], hexes[0]];
-  return ['#000000', ...middle, '#000000'];
+  if (hexes.length === 1) return ['#000000', hexes[0], '#000000'];
+  return ['#000000', hexes[0], hexes[1], hexes[0], '#000000'];
 }
 
 function connectorNode(connector) {
@@ -601,5 +599,23 @@ export function convertWireVizToDot(text) {
     warnings,
   };
 }
+
+// Exportacoes compartilhadas com o conversor de layout organizado. A logica
+// de leitura do YAML continua unica; os dois conversores apenas mudam o DOT.
+export {
+  COLORS,
+  FALLBACK_COLOR,
+  asArray,
+  asText,
+  buildCable,
+  buildConnector,
+  colorRows,
+  dotId,
+  endLabel,
+  escapeHtml,
+  isObject,
+  parseNets,
+  resolveEndpoint,
+};
 
 export default convertWireVizToDot;

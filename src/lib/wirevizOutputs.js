@@ -45,13 +45,15 @@ function svgToImage(svgText) {
   });
 }
 
-export async function renderPng(svgText, scale = 2) {
+export async function renderPng(svgText, scale = 3) {
   const clean = sanitizeSvg(svgText);
   const { width, height } = svgDimensions(clean);
   const image = await svgToImage(clean);
+  // Limite do canvas dos navegadores: reduz a escala sem distorcer a proporcao.
+  const safeScale = Math.max(1, Math.min(scale, 8192 / width, 8192 / height));
   const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, Math.min(8192, Math.round(width * scale)));
-  canvas.height = Math.max(1, Math.min(8192, Math.round(height * scale)));
+  canvas.width = Math.max(1, Math.round(width * safeScale));
+  canvas.height = Math.max(1, Math.round(height * safeScale));
   const context = canvas.getContext('2d');
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, canvas.width, canvas.height);
